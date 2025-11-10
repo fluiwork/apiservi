@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreador Servientrega</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .search-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #c33;
+            margin-bottom: 20px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-card label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .info-card .value {
+            font-size: 18px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .estado {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .estado.ENTREGADO {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .estado.EN-RUTA {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .estado.RECIBIDO {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .historial-section {
+            margin-top: 30px;
+        }
+
+        .historial-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e0e0e0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -32px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #667eea;
+        }
+
+        .timeline-item .evento-numero {
+            position: absolute;
+            left: -28px;
+            top: 15px;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .timeline-item .fecha-hora {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .timeline-item .descripcion {
+            color: #333;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Rastreador Servientrega</h1>
+            <p>Consulta el estado de tu envío en tiempo real</p>
+        </div>
+
+        <div class="search-box">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="numeroGuia" 
+                    placeholder="Ingresa el número de guía (ej: 1234567890)"
+                    maxlength="20"
+                >
+                <button id="btnRastrear" onclick="rastrearEnvio()">Rastrear</button>
+            </div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Consultando información... Por favor espera</p>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('numeroGuia').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                rastrearEnvio();
+            }
+        });
+
+        async function rastrearEnvio() {
+            const numeroGuia = document.getElementById('numeroGuia').value.trim();
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const resultContent = document.getElementById('resultContent');
+            const btnRastrear = document.getElementById('btnRastrear');
+
+            if (!numeroGuia) {
+                alert('Por favor ingresa un número de guía');
+                return;
+            }
+
+            loading.classList.add('show');
+            results.classList.remove('show');
+            btnRastrear.disabled = true;
+
+            try {
+                const response = await fetch('/rastrear', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ numero_guia: numeroGuia })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    mostrarResultados(data.data);
+                } else {
+                    mostrarError(data.error);
+                }
+            } catch (error) {
+                mostrarError('Error de conexión. Por favor intenta nuevamente.');
+            } finally {
+                loading.classList.remove('show');
+                btnRastrear.disabled = false;
+            }
+        }
+
+        function mostrarResultados(data) {
+            const results = document.getElementById('results');
+            const resultContent = document.getElementById('resultContent');
+
+            const estadoClass = data.estado.replace(' ', '-');
+
+            let html = `
+                <div class="info-grid">
+                    <div class="info-card">
+                        <label>Número de Guía</label>
+                        <div class="value">${data.numeroGuia || 'N/A'}</div>
+                    </div>
+                    <div class="info-card">
+                        <label>Estado</label>
+                        <div class="value">
+                            <span class="estado ${estadoClass}">${data.estado}</span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <label>Ciudad de Recogida</label>
+                        <div class="value">${data.ciudadRecogida || 'N/A'}</div>
+                    </div>
+                    <div class="info-card">
+                        <label>Ciudad de Destino</label>
+                        <div class="value">${data.ciudadDestino || 'N/A'}</div>
+                    </div>
+                    <div class="info-card">
+                        <label>Régimen</label>
+                        <div class="value">${data.regimen || 'N/A'}</div>
+                    </div>
+                    <div class="info-card">
+                        <label>Cantidad de Envíos</label>
+                        <div class="value">${data.cantidadEnvios || 'N/A'}</div>
+                    </div>
+                </div>
+            `;
+
+            if (data.historial && data.historial.length > 0) {
+                html += `
+                    <div class="historial-section">
+                        <h2>📋 Historial de Seguimiento</h2>
+                        <div class="timeline">
+                `;
+
+                data.historial.forEach(evento => {
+                    const fechaHora = `${evento.fecha || ''} ${evento.hora || ''}`.trim();
+                    html += `
+                        <div class="timeline-item">
+                            <div class="evento-numero">${evento.numero}</div>
+                            <div class="fecha-hora">${fechaHora || 'Fecha no disponible'}</div>
+                            <div class="descripcion">${evento.descripcion || 'Sin descripción'}</div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            resultContent.innerHTML = html;
+            results.classList.add('show');
+        }
+
+        function mostrarError(mensaje) {
+            const results = document.getElementById('results');
+            const resultContent = document.getElementById('resultContent');
+
+            resultContent.innerHTML = `
+                <div class="error">
+                    <strong>⚠️ Error:</strong> ${mensaje}
+                </div>
+            `;
+
+            results.classList.add('show');
+        }
+    </script>
+</body>
+</html>
