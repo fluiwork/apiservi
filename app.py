@@ -42,13 +42,15 @@ RATE_LIMIT = os.getenv('RATE_LIMIT', '10/minute')
 app = Flask(__name__)
 CORS(app, resources={r"/rastrear": {"origins": ALLOWED_ORIGINS}})
 
-# Si está disponible flask-limiter, inicializarlo. Si no, funcionamos sin él.
 if FLASK_LIMITER_AVAILABLE:
-    limiter = Limiter(app, key_func=get_remote_address, default_limits=[RATE_LIMIT])
+    # Inicializar Limiter sin pasar 'app' como argumento posicional para evitar conflicto de firmas
+    limiter = Limiter(key_func=get_remote_address, default_limits=[RATE_LIMIT])
+    limiter.init_app(app)
     app.logger.info(f"Limiter activado: {RATE_LIMIT}")
 else:
     limiter = None
     app.logger.warning("flask-limiter no está instalado. Recomendado: pip install Flask-Limiter")
+
 
 # ---------------------------
 # Concurrency control (semaphore)
