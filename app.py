@@ -27,7 +27,7 @@ ALLOWED_ORIGINS_ENV = os.getenv('ALLOWED_ORIGINS', '').strip()
 if ALLOWED_ORIGINS_ENV:
     ALLOWED_ORIGINS = [s.strip() for s in ALLOWED_ORIGINS_ENV.split(',') if s.strip()]
 else:
-    ALLOWED_ORIGINS = ["http://localhost:5000", "http://127.0.0.1:5500"]
+    ALLOWED_ORIGINS = ["https://infoservintregarastreo.vercel.app"]
 
 MAX_CONCURRENT_SCRAPES = int(os.getenv('MAX_CONCURRENT_SCRAPES', '4'))
 PAGE_LOAD_TIMEOUT = int(os.getenv('PAGE_LOAD_TIMEOUT', '30'))
