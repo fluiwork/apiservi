@@ -12,8 +12,8 @@ echo "  ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-<not-set>}"
 echo "---------------------------------"
 echo "Python version:"
 python --version || true
-echo "Pip list (first 100 lines):"
-pip list --format=columns | sed -n '1,100p' || true
+echo "Pip list (first 200 lines):"
+pip list --format=columns | sed -n '1,200p' || true
 echo "---------------------------------"
 echo "Try importing app module to capture startup traceback (if any):"
 python - <<'PY'
